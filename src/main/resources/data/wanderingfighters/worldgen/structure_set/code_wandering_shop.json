@@ -1,0 +1,16 @@
+{
+  "structures": [
+    {
+      "structure": "wanderingfighters:code_wandering_shop",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 863616947,
+
+    "spacing": 32,
+
+    "separation": 16
+  }
+}

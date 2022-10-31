@@ -1,0 +1,27 @@
+modLoader="javafml" #mandatory
+loaderVersion="[43,)"
+license="MIT"
+[[mods]]
+modId="wanderingfighters"
+version="${file.jarVersion}"
+displayName="Wandering Fighters"
+authors="Witixin"
+description='''
+Wandering Fighters is a simple mod that modifies the Wandering Trader mob to scream at you and become aggressive when it's attacked.
+
+Wandering Traders have had enough of the undeserved hate they receive. They will now fight back against everything. Do not kill it or it's llamas ever again.
+
+Oh, and in case you were wondering, they're almost unkillable. These guys are hardened experts that have been through tough situations.
+'''
+[[dependencies.wanderingfighters]]
+    modId="forge"
+    mandatory=true
+    versionRange="[43,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.wanderingfighters]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.19.2,1.20)"
+    ordering="NONE"
+    side="BOTH"

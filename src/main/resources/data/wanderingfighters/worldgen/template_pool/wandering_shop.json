@@ -1,0 +1,17 @@
+{
+  "name": "wanderingfighters:wandering_shop",
+
+  "fallback": "minecraft:empty",
+
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "location": "wanderingfighters:wandering_shop",
+        "processors" : "minecraft:empty",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}
