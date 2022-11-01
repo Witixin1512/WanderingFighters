@@ -115,7 +115,7 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.1.47'
-    annotationProcessor 'org.spongepowered:mixin:0.8.4-SNAPSHOT:processor'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5-SNAPSHOT:processor'
     runtimeOnly fg.deobf("curse.maven:torohealth-damage-indicators-245733:3895068")
 }
 

@@ -50,6 +50,8 @@ public class WanderingFighters {
     public static final AttributeModifier DAMAGE_ATTRIBUTE_MODIFIER = new AttributeModifier(UUID.fromString("96b43d56-abd8-4fbe-a48c-aa650b15793c"),
             "wandering_fighters_damage_boost", 12.0, AttributeModifier.Operation.ADDITION);
 
+    //TODO do MAT and WT loot tables
+
     public static final UUID HEALTH_UUID = UUID.fromString("38862a24-5c80-43bd-8974-bb0b1ac1b34c");
     public static final AttributeModifier HEALTH_ATTRIBUTE_MODIFIER = new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", 12.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
 
@@ -173,4 +175,5 @@ public class WanderingFighters {
             }
         }
     }
+
 }
