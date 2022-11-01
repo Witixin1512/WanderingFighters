@@ -63,6 +63,10 @@ public class WanderingFighters {
 
     public static final RegistryObject<BlockItem> CARPET_BLOCK_ITEM = ITEM_REGISTER.register("wander_mat", () -> new BlockItem(CARPET_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
 
+    public static final DeferredRegister<SoundEvent> SOUND_REGISTER = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
+
+    public static final RegistryObject<SoundEvent> WANDERING_PEDDLER_SCREAM = SOUND_REGISTER.register("wandering_fighter_scream", () -> new SoundEvent(new ResourceLocation(MODID, "wandering_fighter_scream")));
+
     /**
      * We are using the Deferred Registry system to register our structure as this is the preferred way on Forge.
      * This will handle registering the base structure for us at the correct time so we don't have to handle it ourselves.
@@ -86,14 +90,13 @@ public class WanderingFighters {
         BLOCK_REGISTER.register(modbus);
         ITEM_REGISTER.register(modbus);
         DEFERRED_REGISTRY_STRUCTURE.register(modbus);
+        SOUND_REGISTER.register(modbus);
     }
 
 
     public void entityAttributeModification(final EntityAttributeModificationEvent event) {
         event.add(EntityType.WANDERING_TRADER, Attributes.ATTACK_DAMAGE, 0.0);
     }
-
-    public static final SoundEvent WANDERING_PEDDLER_SCREAM = new SoundEvent(new ResourceLocation(MODID, "wandering_fighter_scream"));
 
     @SubscribeEvent
     public void onEntitySpawn(final EntityJoinLevelEvent event) {
@@ -110,7 +113,7 @@ public class WanderingFighters {
                 protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
                     double d0 = this.getAttackReachSqr(p_25557_);
                     if (p_25558_ <= d0 && this.getTicksUntilNextAttack() <= 0) {
-                        this.mob.playSound(WANDERING_PEDDLER_SCREAM, 1.0f, 0.5f);
+                        this.mob.playSound(WANDERING_PEDDLER_SCREAM.get(), 1.0f, 0.5f);
                         this.resetAttackCooldown();
                         this.mob.swing(InteractionHand.MAIN_HAND);
                         this.mob.doHurtTarget(p_25557_);

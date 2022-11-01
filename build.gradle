@@ -51,6 +51,8 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
+            args "--nogui", 'true', "--singleplayer", 'yes'
+
             property 'forge.enabledGameTestNamespaces', 'wanderingfighters'
 
             mods {
@@ -116,7 +118,7 @@ repositories {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.1.47'
     annotationProcessor 'org.spongepowered:mixin:0.8.5-SNAPSHOT:processor'
-    runtimeOnly fg.deobf("curse.maven:torohealth-damage-indicators-245733:3895068")
+    //runtimeOnly fg.deobf("curse.maven:torohealth-damage-indicators-245733:3895068")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
