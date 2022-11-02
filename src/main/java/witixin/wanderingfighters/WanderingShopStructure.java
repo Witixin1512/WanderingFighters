@@ -106,10 +106,10 @@ public class WanderingShopStructure extends Structure {
 
     private Vec3i getVectorFromRotation(Rotation rotation, int range) {
         return switch (rotation) {
-            case NONE -> new Vec3i(range, 0, range);
-            case CLOCKWISE_90 -> new Vec3i(-range, 0, range);
-            case CLOCKWISE_180 -> new Vec3i(-range, 0, -range);
-            case COUNTERCLOCKWISE_90 -> new Vec3i(range, 0, -range);
+            case NONE -> new Vec3i(range, 1, range);
+            case CLOCKWISE_90 -> new Vec3i(-range, 1, range);
+            case CLOCKWISE_180 -> new Vec3i(-range, 1, -range);
+            case COUNTERCLOCKWISE_90 -> new Vec3i(range, 1, -range);
         };
     }
 
