@@ -1,0 +1,9 @@
+{
+  "conditions" : [],
+  "type" : "wanderingfighters:loot_modifier_serializer",
+  "emeralds" : 23,
+  "tradesToDrop" : 3,
+  "additionalContents": [
+    {}
+  ]
+}

@@ -1,6 +1,7 @@
 package witixin.wanderingfighters;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -13,10 +14,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.npc.WanderingTrader;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CarpetBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -25,13 +23,17 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.loot.IGlobalLootModifier;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -67,20 +69,32 @@ public class WanderingFighters {
 
     public static final RegistryObject<SoundEvent> WANDERING_PEDDLER_SCREAM = SOUND_REGISTER.register("wandering_fighter_scream", () -> new SoundEvent(new ResourceLocation(MODID, "wandering_fighter_scream")));
 
-    /**
-     * We are using the Deferred Registry system to register our structure as this is the preferred way on Forge.
-     * This will handle registering the base structure for us at the correct time so we don't have to handle it ourselves.
-     */
+
+    public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIER_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, MODID);
+
+    public static final RegistryObject<Codec<WanderingFighterLootModifier>> GLM =
+            LOOT_MODIFIER_DEFERRED_REGISTER.register("loot_modifier_serializer", () -> WanderingFighterLootModifier.CODEC);
+
     public static final DeferredRegister<StructureType<?>> DEFERRED_REGISTRY_STRUCTURE = DeferredRegister.create(Registry.STRUCTURE_TYPE_REGISTRY, MODID);
 
-    /**
-     * Registers the base structure itself and sets what its path is. In this case,
-     * this base structure will have the resourcelocation of structure_tutorial:sky_structures.
-     */
     public static final RegistryObject<StructureType<WanderingShopStructure>> WANDERING_SHOP = DEFERRED_REGISTRY_STRUCTURE.register("wandering_shop", () -> explicitStructureTypeTyping(WanderingShopStructure.CODEC));
 
     private static <T extends Structure> StructureType<T> explicitStructureTypeTyping(Codec<T> structureCodec) {
         return () -> structureCodec;
+    }
+
+    public static final ForgeConfigSpec GENERAL_SPEC;
+    public static ForgeConfigSpec.IntValue RESTOCKING_TICK_TIME;
+
+    static {
+        ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
+        setupConfig(configBuilder);
+        GENERAL_SPEC = configBuilder.build();
+    }
+
+    private static void setupConfig(ForgeConfigSpec.Builder builder) {
+        builder.comment("Chooses the time (in ticks) wandering traders in Wandering Shops wait for before restocking their inventories");
+        RESTOCKING_TICK_TIME = builder.defineInRange("restocking_time", 24000, 0, Integer.MAX_VALUE);
     }
 
     public WanderingFighters() {
@@ -91,6 +105,8 @@ public class WanderingFighters {
         ITEM_REGISTER.register(modbus);
         DEFERRED_REGISTRY_STRUCTURE.register(modbus);
         SOUND_REGISTER.register(modbus);
+        LOOT_MODIFIER_DEFERRED_REGISTER.register(modbus);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GENERAL_SPEC, "wandering_fighters.toml");
     }
 
 
