@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import witixin.wanderingfighters.WanderingFighters;
+import witixin.wanderingfighters.WanderingFightersConfig;
 import witixin.wanderingfighters.WanderingTraderInterface;
 
 @Mixin(WanderingTrader.class)
@@ -45,7 +46,7 @@ public abstract class WanderingTraderMixin extends AbstractVillager implements W
     @Inject(method = "maybeDespawn", at = @At("HEAD"))
     public void wanderingfighters_maybeDespawnInject(CallbackInfo callbackInfo){
         WanderingTrader internal = (WanderingTrader)(Object)this;
-        if (isStoreVillager && internal.tickCount % WanderingFighters.RESTOCKING_TICK_TIME.get() == 0) {
+        if (isStoreVillager && internal.tickCount % WanderingFightersConfig.RESTOCKING_TICK_TIME.get() == 0) {
             this.offers = new MerchantOffers();
             updateTrades();
         }

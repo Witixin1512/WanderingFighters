@@ -41,6 +41,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 
 @Mod(WanderingFighters.MODID)
@@ -49,13 +50,12 @@ public class WanderingFighters {
     public static final String MODID = "wanderingfighters";
     public static final String NBT_KEY = MODID + "_is_store_villager";
 
-    public static final AttributeModifier DAMAGE_ATTRIBUTE_MODIFIER = new AttributeModifier(UUID.fromString("96b43d56-abd8-4fbe-a48c-aa650b15793c"),
-            "wandering_fighters_damage_boost", 12.0, AttributeModifier.Operation.ADDITION);
-
-    //TODO do MAT and WT loot tables
+    public static final Supplier<AttributeModifier> DAMAGE_ATTRIBUTE_MODIFIER = () -> new AttributeModifier(UUID.fromString("96b43d56-abd8-4fbe-a48c-aa650b15793c"),
+            "wandering_fighters_damage_boost", WanderingFightersConfig.DAMAGE_ATTRIBUTE_ADDITION.get(), AttributeModifier.Operation.ADDITION);
 
     public static final UUID HEALTH_UUID = UUID.fromString("38862a24-5c80-43bd-8974-bb0b1ac1b34c");
-    public static final AttributeModifier HEALTH_ATTRIBUTE_MODIFIER = new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", 12.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    public static final Supplier<AttributeModifier> HEALTH_ATTRIBUTE_MODIFIER =
+            () -> new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
 
     public static final DeferredRegister<Block> BLOCK_REGISTER = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
 
@@ -83,19 +83,7 @@ public class WanderingFighters {
         return () -> structureCodec;
     }
 
-    public static final ForgeConfigSpec GENERAL_SPEC;
-    public static ForgeConfigSpec.IntValue RESTOCKING_TICK_TIME;
 
-    static {
-        ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
-        setupConfig(configBuilder);
-        GENERAL_SPEC = configBuilder.build();
-    }
-
-    private static void setupConfig(ForgeConfigSpec.Builder builder) {
-        builder.comment("Chooses the time (in ticks) wandering traders in Wandering Shops wait for before restocking their inventories");
-        RESTOCKING_TICK_TIME = builder.defineInRange("restocking_time", 24000, 0, Integer.MAX_VALUE);
-    }
 
     public WanderingFighters() {
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -106,7 +94,7 @@ public class WanderingFighters {
         DEFERRED_REGISTRY_STRUCTURE.register(modbus);
         SOUND_REGISTER.register(modbus);
         LOOT_MODIFIER_DEFERRED_REGISTER.register(modbus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GENERAL_SPEC, "wandering_fighters.toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, WanderingFightersConfig.GENERAL_SPEC, "wandering_fighters.toml");
     }
 
 
@@ -148,7 +136,7 @@ public class WanderingFighters {
                 public void start() {
                     super.start();
                     if (!llama.getAttributes().hasModifier(Attributes.MAX_HEALTH, HEALTH_UUID)) {
-                        llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER);
+                        llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER.get());
                         llama.setHealth(llama.getMaxHealth());
                     }
 
@@ -177,8 +165,8 @@ public class WanderingFighters {
             }
             if (!(wanderingTrader.getAttributes().hasModifier(Attributes.MAX_HEALTH, HEALTH_UUID))) {
 
-                wanderingTrader.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER);
-                wanderingTrader.getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(DAMAGE_ATTRIBUTE_MODIFIER);
+                wanderingTrader.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER.get());
+                wanderingTrader.getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(DAMAGE_ATTRIBUTE_MODIFIER.get());
                 wanderingTrader.setHealth(wanderingTrader.getMaxHealth());
                 wanderingTrader.setItemSlot(EquipmentSlot.MAINHAND, Items.STICK.getDefaultInstance());
             }
@@ -189,7 +177,7 @@ public class WanderingFighters {
                 llama.setTarget(attacker);
             }
             if (!llama.getAttributes().hasModifier(Attributes.MAX_HEALTH, HEALTH_UUID)) {
-                llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER);
+                llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER.get());
                 llama.setHealth(llama.getMaxHealth());
             }
         }
