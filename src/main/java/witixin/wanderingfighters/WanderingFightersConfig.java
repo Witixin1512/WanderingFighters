@@ -9,6 +9,7 @@ public class WanderingFightersConfig {
     public static ForgeConfigSpec.DoubleValue TRADER_DAMAGE_ATTRIBUTE_ADDITION;
     public static ForgeConfigSpec.DoubleValue TRADER_HEALTH_ATTRIBUTE_MULTIPLICATION;
     public static ForgeConfigSpec.DoubleValue LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION;
+    public static ForgeConfigSpec.IntValue LLAMA_SPIT_INTERVAL;
 
     static {
         ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
@@ -24,6 +25,8 @@ public class WanderingFightersConfig {
         builder.comment("Specify the health boost a Wandering Trader gets after being hurt");
         TRADER_HEALTH_ATTRIBUTE_MULTIPLICATION = builder.defineInRange("fighter_health", 12.5, 0, Double.MAX_VALUE);
         builder.comment("Specify the health boost a Trader Llama gets after being hurt or after it's Wandering Trader is hurt");
-        TRADER_HEALTH_ATTRIBUTE_MULTIPLICATION = builder.defineInRange("fighter_health", 12.5, 0, Double.MAX_VALUE);
+        LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION = builder.defineInRange("llama_health", 12.5, 0, Double.MAX_VALUE);
+        builder.comment("Specifies the amount of time that needs to pass between Llama Spit attacks. The time is in ticks");
+        LLAMA_SPIT_INTERVAL = builder.defineInRange("llama_spit_interval", 10, 1, Integer.MAX_VALUE);
     }
 }

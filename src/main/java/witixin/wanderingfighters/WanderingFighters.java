@@ -137,7 +137,7 @@ public class WanderingFighters {
         if (event.getEntity() instanceof TraderLlama llama) {
             List<Goal> goalListToRemove = llama.goalSelector.getAvailableGoals().stream().map(WrappedGoal::getGoal).filter(WanderingFighters::filterLlamaGoals).toList();
             goalListToRemove.forEach(llama.goalSelector::removeGoal);
-            llama.goalSelector.addGoal(3, new RangedAttackGoal(llama, 1.3d, 10, 20.0f) {
+            llama.goalSelector.addGoal(3, new RangedAttackGoal(llama, 1.3d, WanderingFightersConfig.LLAMA_SPIT_INTERVAL.get(), 20.0f) {
                 @Override
                 public void start() {
                     super.start();
