@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CarpetBlock;
@@ -51,11 +52,16 @@ public class WanderingFighters {
     public static final String NBT_KEY = MODID + "_is_store_villager";
 
     public static final Supplier<AttributeModifier> DAMAGE_ATTRIBUTE_MODIFIER = () -> new AttributeModifier(UUID.fromString("96b43d56-abd8-4fbe-a48c-aa650b15793c"),
-            "wandering_fighters_damage_boost", WanderingFightersConfig.DAMAGE_ATTRIBUTE_ADDITION.get(), AttributeModifier.Operation.ADDITION);
+            "wandering_fighters_damage_boost", WanderingFightersConfig.TRADER_DAMAGE_ATTRIBUTE_ADDITION.get(), AttributeModifier.Operation.ADDITION);
 
     public static final UUID HEALTH_UUID = UUID.fromString("38862a24-5c80-43bd-8974-bb0b1ac1b34c");
     public static final Supplier<AttributeModifier> HEALTH_ATTRIBUTE_MODIFIER =
-            () -> new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
+            () -> new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.TRADER_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
+
+    public static final UUID LLAMA_HEALTH_UUID = UUID.fromString("9e8e06a6-65aa-424d-8a4a-c407333af5bc");
+    public static final Supplier<AttributeModifier> LLAMA_HEALTH_ATTRIBUTE_MODIFIER =
+            () -> new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
+
 
     public static final DeferredRegister<Block> BLOCK_REGISTER = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
 
@@ -135,11 +141,10 @@ public class WanderingFighters {
                 @Override
                 public void start() {
                     super.start();
-                    if (!llama.getAttributes().hasModifier(Attributes.MAX_HEALTH, HEALTH_UUID)) {
-                        llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER.get());
+                    if (!llama.getAttributes().hasModifier(Attributes.MAX_HEALTH, LLAMA_HEALTH_UUID)) {
+                        llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(LLAMA_HEALTH_ATTRIBUTE_MODIFIER.get());
                         llama.setHealth(llama.getMaxHealth());
                     }
-
                 }
             });
         }
@@ -161,7 +166,9 @@ public class WanderingFighters {
         if (livingEntity instanceof WanderingTrader wanderingTrader) {
             wanderingTrader.setAggressive(true);
             if (event.getSource().getDirectEntity() instanceof LivingEntity attacker) {
-                wanderingTrader.setTarget(attacker);
+                if (!(attacker instanceof Player player && player.isCreative())) {
+                    wanderingTrader.setTarget(attacker);
+                }
             }
             if (!(wanderingTrader.getAttributes().hasModifier(Attributes.MAX_HEALTH, HEALTH_UUID))) {
 
@@ -174,7 +181,9 @@ public class WanderingFighters {
         if (livingEntity instanceof TraderLlama llama) {
             llama.setAggressive(true);
             if (event.getSource().getDirectEntity() instanceof LivingEntity attacker) {
-                llama.setTarget(attacker);
+                if (!(attacker instanceof Player player && player.isCreative())) {
+                    llama.setTarget(attacker);
+                }
             }
             if (!llama.getAttributes().hasModifier(Attributes.MAX_HEALTH, HEALTH_UUID)) {
                 llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER.get());

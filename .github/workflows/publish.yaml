@@ -30,7 +30,7 @@ jobs:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
           files-primary: build/libs/!(*-@(dev|sources)).jar
           files-secondary: build/libs/*-@(dev|sources).jar
-          version-type: beta
+          version-type: release
           loaders: forge
           game-versions: 1.19.2
           java: 17
