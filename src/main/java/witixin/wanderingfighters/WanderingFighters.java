@@ -60,7 +60,7 @@ public class WanderingFighters {
 
     public static final UUID LLAMA_HEALTH_UUID = UUID.fromString("9e8e06a6-65aa-424d-8a4a-c407333af5bc");
     public static final Supplier<AttributeModifier> LLAMA_HEALTH_ATTRIBUTE_MODIFIER =
-            () -> new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
+            () -> new AttributeModifier(LLAMA_HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
 
 
     public static final DeferredRegister<Block> BLOCK_REGISTER = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
@@ -185,8 +185,8 @@ public class WanderingFighters {
                     llama.setTarget(attacker);
                 }
             }
-            if (!llama.getAttributes().hasModifier(Attributes.MAX_HEALTH, HEALTH_UUID)) {
-                llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER.get());
+            if (!llama.getAttributes().hasModifier(Attributes.MAX_HEALTH, LLAMA_HEALTH_UUID)) {
+                llama.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(LLAMA_HEALTH_ATTRIBUTE_MODIFIER.get());
                 llama.setHealth(llama.getMaxHealth());
             }
         }
