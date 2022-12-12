@@ -1,8 +1,8 @@
 package witixin.wanderingfighters;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -16,17 +16,15 @@ import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CarpetBlock;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.loot.IGlobalLootModifier;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -35,10 +33,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import witixin.wanderingfighters.mixin.FireBlockInvoker;
 
 import java.util.List;
 import java.util.UUID;
@@ -69,43 +69,57 @@ public class WanderingFighters {
 
     public static final DeferredRegister<Item> ITEM_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
-    public static final RegistryObject<BlockItem> CARPET_BLOCK_ITEM = ITEM_REGISTER.register("wander_mat", () -> new BlockItem(CARPET_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS)));
+    public static final RegistryObject<BlockItem> CARPET_BLOCK_ITEM = ITEM_REGISTER.register("wander_mat", () -> new BlockItem(CARPET_BLOCK.get(), new Item.Properties()));
 
     public static final DeferredRegister<SoundEvent> SOUND_REGISTER = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
 
-    public static final RegistryObject<SoundEvent> WANDERING_PEDDLER_SCREAM = SOUND_REGISTER.register("wandering_fighter_scream", () -> new SoundEvent(new ResourceLocation(MODID, "wandering_fighter_scream")));
-
+    public static final RegistryObject<SoundEvent> WANDERING_PEDDLER_SCREAM = SOUND_REGISTER.register("wandering_fighter_scream", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "wandering_fighter_scream")));
 
     public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIER_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, MODID);
 
     public static final RegistryObject<Codec<WanderingFighterLootModifier>> GLM =
             LOOT_MODIFIER_DEFERRED_REGISTER.register("loot_modifier_serializer", () -> WanderingFighterLootModifier.CODEC);
 
-    public static final DeferredRegister<StructureType<?>> DEFERRED_REGISTRY_STRUCTURE = DeferredRegister.create(Registry.STRUCTURE_TYPE_REGISTRY, MODID);
+    public static final DeferredRegister<StructureType<?>> DEFERRED_REGISTRY_STRUCTURE = DeferredRegister.create(Registries.STRUCTURE_TYPE, MODID);
 
-    public static final RegistryObject<StructureType<WanderingShopStructure>> WANDERING_SHOP = DEFERRED_REGISTRY_STRUCTURE.register("wandering_shop", () -> explicitStructureTypeTyping(WanderingShopStructure.CODEC));
+   public static final RegistryObject<StructureType<WanderingShopStructure>> WANDERING_SHOP = DEFERRED_REGISTRY_STRUCTURE.register("wandering_shop", () -> explicitStructureTypeTyping(WanderingShopStructure.CODEC));
 
     private static <T extends Structure> StructureType<T> explicitStructureTypeTyping(Codec<T> structureCodec) {
         return () -> structureCodec;
     }
 
-
-
     public WanderingFighters() {
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.register(this);
         modbus.addListener(this::entityAttributeModification);
+        modbus.addListener(this::addCreativeTabs);
         BLOCK_REGISTER.register(modbus);
         ITEM_REGISTER.register(modbus);
         DEFERRED_REGISTRY_STRUCTURE.register(modbus);
         SOUND_REGISTER.register(modbus);
         LOOT_MODIFIER_DEFERRED_REGISTER.register(modbus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, WanderingFightersConfig.GENERAL_SPEC, "wandering_fighters.toml");
+
+
+        modbus.addListener(this::setupCommon);
+    }
+
+    public void setupCommon(final FMLCommonSetupEvent event) {
+        ((FireBlockInvoker)(FireBlock) Blocks.FIRE).callSetFlammable(CARPET_BLOCK.get(), 60, 20);
     }
 
 
     public void entityAttributeModification(final EntityAttributeModificationEvent event) {
         event.add(EntityType.WANDERING_TRADER, Attributes.ATTACK_DAMAGE, 0.0);
+    }
+
+    //In mod bus event
+    public void addCreativeTabs(final CreativeModeTabEvent.BuildContents event) {
+
+        if (event.getTab() == CreativeModeTabs.BUILDING_BLOCKS) {
+            event.accept(CARPET_BLOCK_ITEM.get());
+        }
+
     }
 
     @SubscribeEvent

@@ -1,8 +1,6 @@
 {
   "name": "wanderingfighters:wandering_shop",
-
   "fallback": "minecraft:empty",
-
   "elements": [
     {
       "weight": 1,
