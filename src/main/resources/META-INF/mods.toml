@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[44,)"
+loaderVersion="[45,)"
 license="MIT"
 [[mods]]
 modId="wanderingfighters"
@@ -16,12 +16,12 @@ Oh, and in case you were wondering, they're almost unkillable. These guys are ha
 [[dependencies.wanderingfighters]]
     modId="forge"
     mandatory=true
-    versionRange="[44.0.0,)"
+    versionRange="[45.0.43,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.wanderingfighters]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.3,1.20)"
+    versionRange="[1.19.4,1.20)"
     ordering="NONE"
     side="BOTH"

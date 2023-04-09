@@ -32,7 +32,7 @@ jobs:
           files-secondary: build/libs/*-@(dev|sources).jar
           version-type: release
           loaders: forge
-          game-versions: 1.19.3
+          game-versions: 1.19.4
           java: 17
           name: ""
-          changelog: "https://github.com/Witixin1512/WanderingFIghters/commits/main"
+          changelog: "https://github.com/Witixin1512/WanderingFighters/commits/main"
