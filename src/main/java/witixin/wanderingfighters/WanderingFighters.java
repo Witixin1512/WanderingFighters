@@ -20,11 +20,10 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -62,10 +61,14 @@ public class WanderingFighters {
     public static final Supplier<AttributeModifier> LLAMA_HEALTH_ATTRIBUTE_MODIFIER =
             () -> new AttributeModifier(LLAMA_HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
 
+    public static final UUID WANDERING_TRADER_SPEED_BOOST = UUID.fromString("05c4e684-5b8f-4faf-9148-6845417176e3");
+
+    public static final Supplier<AttributeModifier> TRADER_SPEED_BOOST_MODIFIER =
+            () -> new AttributeModifier(WANDERING_TRADER_SPEED_BOOST, "wandering_fighters_speed_boost", WanderingFightersConfig.TRADER_SPEED_BOOST.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
 
     public static final DeferredRegister<Block> BLOCK_REGISTER = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
 
-    public static final RegistryObject<CarpetBlock> CARPET_BLOCK = BLOCK_REGISTER.register("wander_mat", () -> new CarpetBlock(BlockBehaviour.Properties.of(Material.CLOTH_DECORATION, MaterialColor.SNOW).strength(0.1F).sound(SoundType.WOOL)));
+    public static final RegistryObject<CarpetBlock> CARPET_BLOCK = BLOCK_REGISTER.register("wander_mat", () -> new CarpetBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(0.1F).sound(SoundType.WOOL).ignitedByLava()));
 
     public static final DeferredRegister<Item> ITEM_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
@@ -92,46 +95,39 @@ public class WanderingFighters {
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.register(this);
         modbus.addListener(this::entityAttributeModification);
-        modbus.addListener(this::addCreativeTabs);
         BLOCK_REGISTER.register(modbus);
         ITEM_REGISTER.register(modbus);
         DEFERRED_REGISTRY_STRUCTURE.register(modbus);
         SOUND_REGISTER.register(modbus);
         LOOT_MODIFIER_DEFERRED_REGISTER.register(modbus);
+        modbus.addListener(this::addMatToCreativeTab);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, WanderingFightersConfig.GENERAL_SPEC, "wandering_fighters.toml");
-
-
         modbus.addListener(this::setupCommon);
     }
 
     public void setupCommon(final FMLCommonSetupEvent event) {
-        ((FireBlockInvoker)(FireBlock) Blocks.FIRE).callSetFlammable(CARPET_BLOCK.get(), 60, 20);
+        event.enqueueWork( () -> ((FireBlockInvoker)(FireBlock) Blocks.FIRE).callSetFlammable(CARPET_BLOCK.get(), 60, 20));
     }
 
+    public void addMatToCreativeTab(final BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) event.accept(CARPET_BLOCK_ITEM.get().getDefaultInstance());
+    }
 
     public void entityAttributeModification(final EntityAttributeModificationEvent event) {
         event.add(EntityType.WANDERING_TRADER, Attributes.ATTACK_DAMAGE, 0.0);
     }
 
-    //In mod bus event
-    public void addCreativeTabs(final CreativeModeTabEvent.BuildContents event) {
-
-        if (event.getTab() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(CARPET_BLOCK_ITEM.get());
-        }
-
-    }
 
     @SubscribeEvent
     public void onEntitySpawn(final EntityJoinLevelEvent event) {
-        if (event.getEntity().level.isClientSide) return;
+        if (event.getEntity().level().isClientSide) return;
 
         if (event.getEntity() instanceof WanderingTrader trader) {
 
             List<Goal> goalListToRemove = trader.goalSelector.getAvailableGoals().stream().map(WrappedGoal::getGoal).filter(WanderingFighters::filterWandererGoals).toList();
             goalListToRemove.forEach(trader.goalSelector::removeGoal);
-            trader.goalSelector.addGoal(2, new MoveTowardsTargetGoal(trader, 0.6, 32f));
-            trader.goalSelector.addGoal(1, new MeleeAttackGoal(trader, 0.8, true){
+            trader.goalSelector.addGoal(2, new MoveTowardsTargetGoal(trader, 1.0, 32f));
+            trader.goalSelector.addGoal(1, new MeleeAttackGoal(trader, 1.0, true){
 
                 @Override
                 protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
@@ -175,7 +171,7 @@ public class WanderingFighters {
     @SubscribeEvent
     public void onDamageEvent(final LivingDamageEvent event) {
         final LivingEntity livingEntity = event.getEntity();
-        if (livingEntity.level.isClientSide) return;
+        if (livingEntity.level().isClientSide) return;
 
         if (livingEntity instanceof WanderingTrader wanderingTrader) {
             wanderingTrader.setAggressive(true);
@@ -188,6 +184,7 @@ public class WanderingFighters {
 
                 wanderingTrader.getAttribute(Attributes.MAX_HEALTH).addPermanentModifier(HEALTH_ATTRIBUTE_MODIFIER.get());
                 wanderingTrader.getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(DAMAGE_ATTRIBUTE_MODIFIER.get());
+                wanderingTrader.getAttribute(Attributes.MOVEMENT_SPEED).addPermanentModifier(TRADER_SPEED_BOOST_MODIFIER.get());
                 wanderingTrader.setHealth(wanderingTrader.getMaxHealth());
                 wanderingTrader.setItemSlot(EquipmentSlot.MAINHAND, Items.STICK.getDefaultInstance());
             }

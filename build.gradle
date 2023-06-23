@@ -1,24 +1,11 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven {
-            url = 'https://repo.spongepowered.org/repository/maven-public/'
-        }
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7.+'
-    }
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'net.darkhax.curseforgegradle' version '1.0.11'
 }
 
-apply plugin: 'java'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'org.spongepowered.mixin'
-
-version = "1.19.4-forge-${version}"
+version = "1.20.1-forge-${version}"
 group = 'witixin.wanderingfighters' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'wanderingfighters'
 
@@ -26,7 +13,7 @@ archivesBaseName = 'wanderingfighters'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-   mappings channel: 'official', version: '1.19.4'
+   mappings channel: 'official', version: '1.20.1'
    //accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
     runs {
         client {
@@ -116,12 +103,10 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.4-45.0.43'
+    minecraft 'net.minecraftforge:forge:1.20.1-47.0.19'
     annotationProcessor 'org.spongepowered:mixin:0.8.5-SNAPSHOT:processor'
-    //runtimeOnly fg.deobf("curse.maven:torohealth-damage-indicators-245733:3895068")
 }
 
-// Example for how to get properties into the manifest for reading at runtime.
 jar {
     manifest {
         attributes([
@@ -142,12 +127,28 @@ mixin {
     config "wanderingfighters.mixins.json"
 }
 
-// Example configuration to allow publishing using the maven-publish plugin
-// This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-// publish.dependsOn('reobfJar')
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+task publishToCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    apiToken = project.findProperty("curseforge.upload.api.token") ?: "invalid/no CurseForge API token found!"
+
+    def mainFile = upload("695587", file("${project.buildDir}/libs/${archivesBaseName}-${version}.jar"))
+
+    mainFile.displayName = "${archivesBaseName}-${version}"
+    mainFile.releaseType = "release"
+    mainFile.addModLoader("Forge")
+    mainFile.addGameVersion("1.20.1")
+    mainFile.addJavaVersion("Java 17")
+
+    mainFile.changelog = "Updated to 1.20.1!"
+}
+
+tasks.publishToCurseForge.dependsOn(tasks.assemble)
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
