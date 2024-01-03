@@ -26,24 +26,28 @@ public class WanderingFighterLootModifier extends LootModifier {
                     .and(instance.group(
                             Codec.INT.fieldOf("emeralds").forGetter(thing -> thing.emeralds),
                             Codec.INT.fieldOf("tradesToDrop").forGetter(thing -> thing.tradesToDrop),
-                            ItemStack.CODEC.listOf().optionalFieldOf("additionalContents", List.of()).forGetter(thing -> thing.additionalContents)
+                            ItemStack.CODEC.listOf().optionalFieldOf("additionalContents", List.of()).forGetter(thing -> thing.additionalContents),
+                            Codec.BOOL.optionalFieldOf("applyToAllWanderingTraders", false).forGetter(thing -> thing.applyToAllTraders)
                     )).apply(instance, WanderingFighterLootModifier::new));
 
     private final int emeralds;
     private final int tradesToDrop;
     private final List<ItemStack> additionalContents;
 
-    public WanderingFighterLootModifier(LootItemCondition[] conditionsIn, int emeralds, int tradesToDrop, List<ItemStack> toDrop) {
+    private final boolean applyToAllTraders;
+
+    public WanderingFighterLootModifier(LootItemCondition[] conditionsIn, int emeralds, int tradesToDrop, List<ItemStack> toDrop, boolean applyToAllTraders) {
         super(conditionsIn);
         this.emeralds = emeralds;
         this.tradesToDrop = tradesToDrop;
         this.additionalContents = toDrop;
+        this.applyToAllTraders = applyToAllTraders;
     }
 
     @Override
     protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
 
-        if (context.hasParam(LootContextParams.THIS_ENTITY) && context.getParam(LootContextParams.THIS_ENTITY) instanceof WanderingTrader trader && ((WanderingTraderInterface) trader).isStoreVillager()) {
+        if (context.hasParam(LootContextParams.THIS_ENTITY) && context.getParam(LootContextParams.THIS_ENTITY) instanceof WanderingTrader trader && (applyToAllTraders || ((WanderingTraderInterface) trader).isStoreVillager())) {
             if (emeralds > 0) {
                 generatedLoot.add(new ItemStack(Items.EMERALD, emeralds));
             }
