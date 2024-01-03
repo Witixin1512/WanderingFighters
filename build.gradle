@@ -144,8 +144,8 @@ task publishToCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForg
     mainFile.addModLoader("Forge")
     mainFile.addGameVersion("1.20.1")
     mainFile.addJavaVersion("Java 17")
-
-    mainFile.changelog = "Add a setting in the modifier to allow all wandering traders to drop their loot."
+    //TODO update version too
+    mainFile.changelog = "Enable setting by default."
 }
 
 tasks.publishToCurseForge.dependsOn(tasks.assemble)
