@@ -1,4 +1,4 @@
-package witixin.wanderingfighters;
+package net.witixin.wanderingfighters;
 
 
 public interface WanderingTraderInterface {

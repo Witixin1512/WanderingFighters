@@ -1,6 +1,7 @@
-package witixin.wanderingfighters;
+package net.witixin.wanderingfighters;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -26,12 +27,13 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 
 import java.util.Optional;
 
 public class WanderingShopStructure extends Structure {
 
-    public static final Codec<WanderingShopStructure> CODEC = RecordCodecBuilder.<WanderingShopStructure>mapCodec(instance ->
+    public static final MapCodec<WanderingShopStructure> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(WanderingShopStructure.settingsCodec(instance),
                     StructureTemplatePool.CODEC.fieldOf("start_pool").forGetter(structure -> structure.startPool),
                     ResourceLocation.CODEC.optionalFieldOf("start_jigsaw_name").forGetter(structure -> structure.startJigsawName),
@@ -39,7 +41,7 @@ public class WanderingShopStructure extends Structure {
                     HeightProvider.CODEC.fieldOf("start_height").forGetter(structure -> structure.startHeight),
                     Heightmap.Types.CODEC.optionalFieldOf("project_start_to_heightmap").forGetter(structure -> structure.projectStartToHeightmap),
                     Codec.intRange(1, 128).fieldOf("max_distance_from_center").forGetter(structure -> structure.maxDistanceFromCenter)
-            ).apply(instance, WanderingShopStructure::new)).codec();
+            ).apply(instance, WanderingShopStructure::new));
 
 
     private final Holder<StructureTemplatePool> startPool;
@@ -49,13 +51,13 @@ public class WanderingShopStructure extends Structure {
     private final Optional<Heightmap.Types> projectStartToHeightmap;
     private final int maxDistanceFromCenter;
 
-    public WanderingShopStructure(Structure.StructureSettings config,
-                         Holder<StructureTemplatePool> startPool,
-                         Optional<ResourceLocation> startJigsawName,
-                         int size,
-                         HeightProvider startHeight,
-                         Optional<Heightmap.Types> projectStartToHeightmap,
-                         int maxDistanceFromCenter)
+    public WanderingShopStructure(StructureSettings config,
+                                  Holder<StructureTemplatePool> startPool,
+                                  Optional<ResourceLocation> startJigsawName,
+                                  int size,
+                                  HeightProvider startHeight,
+                                  Optional<Heightmap.Types> projectStartToHeightmap,
+                                  int maxDistanceFromCenter)
     {
         super(config);
         this.startPool = startPool;
@@ -67,15 +69,14 @@ public class WanderingShopStructure extends Structure {
     }
 
     @Override
-    public Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext context) {
+    public Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
 
         int startY = this.startHeight.sample(context.random(), new WorldGenerationContext(context.chunkGenerator(), context.heightAccessor()));
-
         ChunkPos chunkPos = context.chunkPos();
         BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), startY, chunkPos.getMinBlockZ());
         Optional<GenerationStub> structurePiecesGenerator =
                 JigsawPlacement.addPieces(context, this.startPool, this.startJigsawName, this.size, blockPos,
-                        false, this.projectStartToHeightmap, this.maxDistanceFromCenter);
+                        false, this.projectStartToHeightmap, this.maxDistanceFromCenter, PoolAliasLookup.EMPTY);
 
         return structurePiecesGenerator;
     }
@@ -85,7 +86,7 @@ public class WanderingShopStructure extends Structure {
         PoolElementStructurePiece structurePiece = ((PoolElementStructurePiece)piecesContainer.pieces().get(0));
         BlockPos corePos = structurePiece.getPosition().offset(getVectorFromRotation(structurePiece.getRotation(), 4));
         if (boundingBox.isInside(corePos)) {
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < WanderingFightersConfig.TRADERS_TO_SPAWN.get(); ++i) {
                 WanderingTrader trader = spawnWanderer(worldGenLevel, corePos);
                 if (randomSource.nextBoolean()) {
                     trader = spawnWanderer(worldGenLevel, corePos);
@@ -115,7 +116,7 @@ public class WanderingShopStructure extends Structure {
         WanderingTrader trader = EntityType.WANDERING_TRADER.create(worldGenLevel.getLevel());
         trader.setPersistenceRequired();
         trader.moveTo(corePos.getX(), corePos.getY(), corePos.getZ());
-        trader.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(corePos), MobSpawnType.STRUCTURE, null, null);
+        trader.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(corePos), MobSpawnType.STRUCTURE,  null);
         trader.setWanderTarget(corePos);
         trader.restrictTo(corePos, 8);
         ((WanderingTraderInterface)(trader)).setChameleonVillager(true);
@@ -127,7 +128,7 @@ public class WanderingShopStructure extends Structure {
         TraderLlama traderLlama = EntityType.TRADER_LLAMA.create(worldGenLevel.getLevel());
         traderLlama.setPersistenceRequired();
         traderLlama.moveTo(corePos.getX(), corePos.getY(), corePos.getZ());
-        traderLlama.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(corePos), MobSpawnType.STRUCTURE, null, null);
+        traderLlama.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(corePos), MobSpawnType.STRUCTURE,  null);
         worldGenLevel.addFreshEntityWithPassengers(traderLlama);
         traderLlama.setLeashedTo(parent, true);
         return traderLlama;

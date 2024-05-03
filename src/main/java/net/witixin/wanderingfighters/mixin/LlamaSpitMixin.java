@@ -1,4 +1,4 @@
-package witixin.wanderingfighters.mixin;
+package net.witixin.wanderingfighters.mixin;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;

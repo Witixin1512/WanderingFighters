@@ -1,7 +1,8 @@
-package witixin.wanderingfighters;
+package net.witixin.wanderingfighters;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Registry;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -15,29 +16,30 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
-import witixin.wanderingfighters.mixin.FireBlockInvoker;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,62 +53,62 @@ public class WanderingFighters {
     public static final String NBT_KEY = MODID + "_is_store_villager";
 
     public static final Supplier<AttributeModifier> DAMAGE_ATTRIBUTE_MODIFIER = () -> new AttributeModifier(UUID.fromString("96b43d56-abd8-4fbe-a48c-aa650b15793c"),
-            "wandering_fighters_damage_boost", WanderingFightersConfig.TRADER_DAMAGE_ATTRIBUTE_ADDITION.get(), AttributeModifier.Operation.ADDITION);
+            "wandering_fighters_damage_boost", WanderingFightersConfig.TRADER_DAMAGE_ATTRIBUTE_ADDITION.get(), AttributeModifier.Operation.ADD_VALUE);
 
     public static final UUID HEALTH_UUID = UUID.fromString("38862a24-5c80-43bd-8974-bb0b1ac1b34c");
     public static final Supplier<AttributeModifier> HEALTH_ATTRIBUTE_MODIFIER =
-            () -> new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.TRADER_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
+            () -> new AttributeModifier(HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.TRADER_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
     public static final UUID LLAMA_HEALTH_UUID = UUID.fromString("9e8e06a6-65aa-424d-8a4a-c407333af5bc");
     public static final Supplier<AttributeModifier> LLAMA_HEALTH_ATTRIBUTE_MODIFIER =
-            () -> new AttributeModifier(LLAMA_HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
+            () -> new AttributeModifier(LLAMA_HEALTH_UUID, "wandering_fighters_health_boost", WanderingFightersConfig.LLAMA_HEALTH_ATTRIBUTE_MULTIPLICATION.get(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
     public static final UUID WANDERING_TRADER_SPEED_BOOST = UUID.fromString("05c4e684-5b8f-4faf-9148-6845417176e3");
 
     public static final Supplier<AttributeModifier> TRADER_SPEED_BOOST_MODIFIER =
-            () -> new AttributeModifier(WANDERING_TRADER_SPEED_BOOST, "wandering_fighters_speed_boost", WanderingFightersConfig.TRADER_SPEED_BOOST.get(), AttributeModifier.Operation.MULTIPLY_TOTAL);
+            () -> new AttributeModifier(WANDERING_TRADER_SPEED_BOOST, "wandering_fighters_speed_boost", WanderingFightersConfig.TRADER_SPEED_BOOST.get(), AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
-    public static final DeferredRegister<Block> BLOCK_REGISTER = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+    public static final DeferredRegister<Block> BLOCK_REGISTER = DeferredRegister.create(BuiltInRegistries.BLOCK, MODID);
 
-    public static final RegistryObject<CarpetBlock> CARPET_BLOCK = BLOCK_REGISTER.register("wander_mat", () -> new CarpetBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(0.1F).sound(SoundType.WOOL).ignitedByLava()));
+    public static final DeferredHolder<Block, CarpetBlock> CARPET_BLOCK = BLOCK_REGISTER.register("wander_mat", () -> new CarpetBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(0.1F).sound(SoundType.WOOL).ignitedByLava()));
 
-    public static final DeferredRegister<Item> ITEM_REGISTER = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    public static final DeferredRegister<Item> ITEM_REGISTER = DeferredRegister.create(BuiltInRegistries.ITEM, MODID);
 
-    public static final RegistryObject<BlockItem> CARPET_BLOCK_ITEM = ITEM_REGISTER.register("wander_mat", () -> new BlockItem(CARPET_BLOCK.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> CARPET_BLOCK_ITEM = ITEM_REGISTER.register("wander_mat", () -> new BlockItem(CARPET_BLOCK.get(), new Item.Properties()));
 
-    public static final DeferredRegister<SoundEvent> SOUND_REGISTER = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MODID);
+    public static final DeferredRegister<SoundEvent> SOUND_REGISTER = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, MODID);
 
-    public static final RegistryObject<SoundEvent> WANDERING_PEDDLER_SCREAM = SOUND_REGISTER.register("wandering_fighter_scream", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "wandering_fighter_scream")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> WANDERING_PEDDLER_SCREAM = SOUND_REGISTER.register("wandering_fighter_scream", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(MODID, "wandering_fighter_scream")));
 
-    public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIER_DEFERRED_REGISTER = DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, MODID);
+    public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIER_DEFERRED_REGISTER = DeferredRegister.create(
+            NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, MODID);
 
-    public static final RegistryObject<Codec<WanderingFighterLootModifier>> GLM =
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<WanderingFighterLootModifier>> GLM =
             LOOT_MODIFIER_DEFERRED_REGISTER.register("loot_modifier_serializer", () -> WanderingFighterLootModifier.CODEC);
 
     public static final DeferredRegister<StructureType<?>> DEFERRED_REGISTRY_STRUCTURE = DeferredRegister.create(Registries.STRUCTURE_TYPE, MODID);
 
-   public static final RegistryObject<StructureType<WanderingShopStructure>> WANDERING_SHOP = DEFERRED_REGISTRY_STRUCTURE.register("wandering_shop", () -> explicitStructureTypeTyping(WanderingShopStructure.CODEC));
+   public static final DeferredHolder<StructureType<?>, StructureType<WanderingShopStructure>> WANDERING_SHOP = DEFERRED_REGISTRY_STRUCTURE.register("wandering_shop", () -> explicitStructureTypeTyping(WanderingShopStructure.CODEC));
 
-    private static <T extends Structure> StructureType<T> explicitStructureTypeTyping(Codec<T> structureCodec) {
+    private static <T extends Structure> StructureType<T> explicitStructureTypeTyping(MapCodec<T> structureCodec) {
         return () -> structureCodec;
     }
 
-    public WanderingFighters() {
-        IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
-        MinecraftForge.EVENT_BUS.register(this);
-        modbus.addListener(this::entityAttributeModification);
-        BLOCK_REGISTER.register(modbus);
-        ITEM_REGISTER.register(modbus);
-        DEFERRED_REGISTRY_STRUCTURE.register(modbus);
-        SOUND_REGISTER.register(modbus);
-        LOOT_MODIFIER_DEFERRED_REGISTER.register(modbus);
-        modbus.addListener(this::addMatToCreativeTab);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, WanderingFightersConfig.GENERAL_SPEC, "wandering_fighters.toml");
-        modbus.addListener(this::setupCommon);
+    public WanderingFighters(ModContainer container, IEventBus modBus) {
+        NeoForge.EVENT_BUS.register(this);
+        modBus.addListener(this::entityAttributeModification);
+        BLOCK_REGISTER.register(modBus);
+        ITEM_REGISTER.register(modBus);
+        DEFERRED_REGISTRY_STRUCTURE.register(modBus);
+        SOUND_REGISTER.register(modBus);
+        LOOT_MODIFIER_DEFERRED_REGISTER.register(modBus);
+        modBus.addListener(this::addMatToCreativeTab);
+        container.registerConfig(ModConfig.Type.COMMON, WanderingFightersConfig.GENERAL_SPEC, "wandering_fighters.toml");
+        modBus.addListener(this::setupCommon);
     }
 
     public void setupCommon(final FMLCommonSetupEvent event) {
-        event.enqueueWork( () -> ((FireBlockInvoker)(FireBlock) Blocks.FIRE).callSetFlammable(CARPET_BLOCK.get(), 60, 20));
+        event.enqueueWork(() -> ((FireBlock) Blocks.FIRE).setFlammable(CARPET_BLOCK.get(), 60, 20));
     }
 
     public void addMatToCreativeTab(final BuildCreativeModeTabContentsEvent event) {
@@ -128,16 +130,14 @@ public class WanderingFighters {
             goalListToRemove.forEach(trader.goalSelector::removeGoal);
             trader.goalSelector.addGoal(2, new MoveTowardsTargetGoal(trader, 1.0, 32f));
             trader.goalSelector.addGoal(1, new MeleeAttackGoal(trader, 1.0, true){
-
                 @Override
-                protected void checkAndPerformAttack(LivingEntity p_25557_, double p_25558_) {
-                    double d0 = this.getAttackReachSqr(p_25557_);
-                    if (p_25558_ <= d0 && this.getTicksUntilNextAttack() <= 0) {
-                        this.mob.playSound(WANDERING_PEDDLER_SCREAM.get(), 1.0f, 0.5f);
+                protected void checkAndPerformAttack(LivingEntity pTarget){
+                    if (this.canPerformAttack(pTarget)) {
+                        this.mob.playSound(WANDERING_PEDDLER_SCREAM.get(), 0.5f, 0.5f);
                         this.resetAttackCooldown();
                         this.mob.swing(InteractionHand.MAIN_HAND);
-                        this.mob.doHurtTarget(p_25557_);
-                        if (p_25557_.isDeadOrDying() || p_25557_ instanceof TraderLlama || p_25557_ instanceof WanderingTrader) {
+                        this.mob.doHurtTarget(pTarget);
+                        if (pTarget.isDeadOrDying() || pTarget instanceof TraderLlama || pTarget instanceof WanderingTrader) {
                             mob.setTarget(null);
                         }
                     }

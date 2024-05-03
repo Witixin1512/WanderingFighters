@@ -1,6 +1,7 @@
-package witixin.wanderingfighters;
+package net.witixin.wanderingfighters;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.entity.npc.WanderingTrader;
@@ -11,8 +12,8 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.List;
 
 public class WanderingFighterLootModifier extends LootModifier {
 
-    public static final Codec<WanderingFighterLootModifier> CODEC = RecordCodecBuilder.create(instance ->
+    public static final MapCodec<WanderingFighterLootModifier> CODEC = RecordCodecBuilder.mapCodec(instance ->
             codecStart(instance)
                     .and(instance.group(
                             Codec.INT.fieldOf("emeralds").forGetter(thing -> thing.emeralds),
@@ -81,7 +82,7 @@ public class WanderingFighterLootModifier extends LootModifier {
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
+    public MapCodec<? extends IGlobalLootModifier> codec() {
         return CODEC;
     }
 }

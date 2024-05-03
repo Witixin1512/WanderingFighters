@@ -1,4 +1,4 @@
-package witixin.wanderingfighters.mixin;
+package net.witixin.wanderingfighters.mixin;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
@@ -6,13 +6,13 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
+import net.witixin.wanderingfighters.WanderingFighters;
+import net.witixin.wanderingfighters.WanderingFightersConfig;
+import net.witixin.wanderingfighters.WanderingTraderInterface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import witixin.wanderingfighters.WanderingFighters;
-import witixin.wanderingfighters.WanderingFightersConfig;
-import witixin.wanderingfighters.WanderingTraderInterface;
 
 @Mixin(WanderingTrader.class)
 public abstract class WanderingTraderMixin extends AbstractVillager implements WanderingTraderInterface {
