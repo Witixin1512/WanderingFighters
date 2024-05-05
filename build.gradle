@@ -145,7 +145,7 @@ task publishToCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForg
     mainFile.addGameVersion("1.20.1")
     mainFile.addJavaVersion("Java 17")
     //TODO update version too
-    mainFile.changelog = "Enable setting by default."
+    mainFile.changelog = "Backport worldgen changes to 1.20.1"
 }
 
 tasks.publishToCurseForge.dependsOn(tasks.assemble)

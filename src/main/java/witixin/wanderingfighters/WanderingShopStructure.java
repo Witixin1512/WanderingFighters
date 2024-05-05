@@ -114,7 +114,7 @@ public class WanderingShopStructure extends Structure {
     private WanderingTrader spawnWanderer(WorldGenLevel worldGenLevel, BlockPos corePos) {
         WanderingTrader trader = EntityType.WANDERING_TRADER.create(worldGenLevel.getLevel());
         trader.setPersistenceRequired();
-        trader.moveTo(corePos.getX(), corePos.getY(), corePos.getZ());
+        trader.moveTo(corePos.getX() + trader.getRandom().nextGaussian(), corePos.getY(), corePos.getZ() + trader.getRandom().nextGaussian());
         trader.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(corePos), MobSpawnType.STRUCTURE, null, null);
         trader.setWanderTarget(corePos);
         trader.restrictTo(corePos, 8);
