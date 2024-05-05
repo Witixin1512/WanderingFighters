@@ -1,1 +1,1 @@
-3.0.1 - Update NeoForge
+3.0.1 - Update NeoForge and improve how wandering shops spawn.

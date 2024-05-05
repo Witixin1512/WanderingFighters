@@ -9,7 +9,7 @@
 
   "biomes": "#wanderingfighters:has_structure/wandering_shop_biomes",
 
-  "terrain_adaptation": "none",
+  "terrain_adaptation": "beard_box",
   "step": "surface_structures",
 
   "start_height": {
