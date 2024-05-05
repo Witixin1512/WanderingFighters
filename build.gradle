@@ -1,3 +1,5 @@
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
+
 plugins {
     id 'java-library'
     id 'eclipse'
@@ -143,7 +145,7 @@ java {
     withJavadocJar()
 }
 
-task publishToCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+task publishToCurseForge(type: TaskPublishCurseForge) {
     apiToken = project.findProperty("curseforge.upload.api.token") ?: "invalid/no CurseForge API token found!"
     def mainFile = upload("695587", tasks.jar)
 
