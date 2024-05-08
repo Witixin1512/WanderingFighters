@@ -35,7 +35,7 @@ public class WanderingFightersConfig {
         builder.comment("Specify the amount of time that needs to pass between Llama Spit attacks. The time is in ticks");
         LLAMA_SPIT_INTERVAL = builder.defineInRange("llama_spit_interval", 10, 1, Integer.MAX_VALUE);
         builder.comment("Specify the speed boost that the wandering trader gets after being enraged. The number below is multiplied by their current stat.");
-        TRADER_SPEED_BOOST = builder.defineInRange("trader_speed_boost", 1.0, 0, Double.MAX_VALUE);
+        TRADER_SPEED_BOOST = builder.defineInRange("trader_speed_boost", 0.5, 0, Double.MAX_VALUE);
         builder.comment("Specify the amount of traders that will spawn in a structure");
         TRADERS_TO_SPAWN = builder.defineInRange("trader_spawn_count",  3, 0, Integer.MAX_VALUE);
     }
