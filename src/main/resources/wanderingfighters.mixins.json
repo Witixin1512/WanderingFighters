@@ -7,7 +7,9 @@
   "mixins": [
     "LlamaSpitMixin",
     "WanderingTraderMixin",
-    "FireBlockInvoker"
+    "FireBlockInvoker",
+    "MobIsWanderingTraderMixin",
+    "EntityIsWanderingTraderMixin"
   ],
   "client": [
 

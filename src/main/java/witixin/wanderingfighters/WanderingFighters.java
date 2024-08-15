@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -177,7 +178,13 @@ public class WanderingFighters {
         if (livingEntity instanceof WanderingTrader wanderingTrader) {
             wanderingTrader.setAggressive(true);
             if (event.getSource().getDirectEntity() instanceof LivingEntity attacker) {
-                if (!(attacker instanceof Player player && player.isCreative())) {
+                if (attacker instanceof Player player) {
+                    wanderingTrader.startSeenByPlayer((ServerPlayer) player);
+                    if (!player.isCreative()) {
+                        wanderingTrader.setTarget(player);
+                    }
+                }
+                else {
                     wanderingTrader.setTarget(attacker);
                 }
             }
@@ -190,7 +197,7 @@ public class WanderingFighters {
                 wanderingTrader.setItemSlot(EquipmentSlot.MAINHAND, Items.STICK.getDefaultInstance());
             }
         }
-        if (livingEntity instanceof TraderLlama llama) {
+        else if (livingEntity instanceof TraderLlama llama) {
             llama.setAggressive(true);
             if (event.getSource().getDirectEntity() instanceof LivingEntity attacker) {
                 if (!(attacker instanceof Player player && player.isCreative())) {

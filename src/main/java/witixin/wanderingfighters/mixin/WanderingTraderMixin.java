@@ -42,6 +42,11 @@ public abstract class WanderingTraderMixin extends AbstractVillager implements W
         this.isChameleonVillager = value;
     }
 
+    @Override
+    public ServerBossEvent getBossEvent() {
+        return this.bossEvent;
+    }
+
     @Inject(method = "addAdditionalSaveData", at = @At("HEAD"))
     public void wanderingfighters_addAdditionalSaveData(CompoundTag compoundTag, CallbackInfo info) {
         compoundTag.putBoolean(WanderingFighters.NBT_KEY, isChameleonVillager);
@@ -60,20 +65,4 @@ public abstract class WanderingTraderMixin extends AbstractVillager implements W
             updateTrades();
         }
     }
-
-    @Inject(method = "Lnet/minecraft/world/entity/npc/WanderingTrader;customServerAiStep()V", at = @At("TAIL"))
-    private void wanderingfighters_customServerAiStep(CallbackInfo callbackInfo) {
-        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
-    }
-
-    @Inject(method = "Lnet/minecraft/entity/Entity;startSeenByPlayer(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("TAIL"))
-    private void wanderingfighters_startSeenByPlayer(ServerPlayer player, CallbackInfo callbackInfo) {
-        bossEvent.addPlayer(player);
-    }
-
-    @Inject(method = "Lnet/minecraft/entity/Entity;stopSeenByPlayer(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("TAIL"))
-    private void wanderingfighters_stopSeenByPlayer(ServerPlayer player, CallbackInfo callbackInfo) {
-        bossEvent.removePlayer(player);
-    }
-
 }
