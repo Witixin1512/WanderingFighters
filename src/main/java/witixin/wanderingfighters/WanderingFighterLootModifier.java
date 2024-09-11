@@ -67,7 +67,7 @@ public class WanderingFighterLootModifier extends LootModifier {
 
             for (MerchantOffer merchantOffer : offersToDrop) {
                 final ItemStack output = merchantOffer.assemble();
-                if (!output.isEmpty())
+                if (!output.isEmpty() && !merchantOffer.isOutOfStock())
                     generatedLoot.add(output);
             }
 

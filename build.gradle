@@ -145,7 +145,7 @@ task publishToCurseForge(type: net.darkhax.curseforgegradle.TaskPublishCurseForg
     mainFile.addGameVersion("1.20.1")
     mainFile.addJavaVersion("Java 17")
     //TODO update version too
-    mainFile.changelog = "Add config option to disable drops"
+    mainFile.changelog = "Only include outputs in drops of trades"
 }
 
 tasks.publishToCurseForge.dependsOn(tasks.assemble)
