@@ -66,9 +66,9 @@ public class WanderingFighterLootModifier extends LootModifier {
             }
 
             for (MerchantOffer merchantOffer : offersToDrop) {
-                generatedLoot.add(merchantOffer.assemble());
-                generatedLoot.add(merchantOffer.getBaseCostA().copy());
-                generatedLoot.add(merchantOffer.getCostB().copy());
+                final ItemStack output = merchantOffer.assemble();
+                if (!output.isEmpty())
+                    generatedLoot.add(output);
             }
 
             if (!additionalContents.isEmpty()) {
