@@ -12,6 +12,7 @@ public class WanderingFightersConfig {
 
     public static ForgeConfigSpec.DoubleValue TRADER_SPEED_BOOST;
     public static ForgeConfigSpec.IntValue LLAMA_SPIT_INTERVAL;
+    public static ForgeConfigSpec.BooleanValue DROP_WANDERING_TRADER_SHOP;
 
     static {
         ForgeConfigSpec.Builder configBuilder = new ForgeConfigSpec.Builder();
@@ -33,5 +34,7 @@ public class WanderingFightersConfig {
         LLAMA_SPIT_INTERVAL = builder.defineInRange("llama_spit_interval", 10, 1, Integer.MAX_VALUE);
         builder.comment("Specify the speed boost that the wandering trader gets after being enraged. The number below is multiplied by their current stat.");
         TRADER_SPEED_BOOST = builder.defineInRange("trader_speed_boost", 0.5, 0, Double.MAX_VALUE);
+        builder.comment("Whether the Wandering Trader will drop its shop contents on death");
+        DROP_WANDERING_TRADER_SHOP = builder.define("trader_drop_shop_contents", true);
     }
 }

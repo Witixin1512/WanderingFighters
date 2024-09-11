@@ -46,6 +46,7 @@ public class WanderingFighterLootModifier extends LootModifier {
 
     @Override
     protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
+        if (!WanderingFightersConfig.DROP_WANDERING_TRADER_SHOP.get()) return generatedLoot;
 
         if (context.hasParam(LootContextParams.THIS_ENTITY) && context.getParam(LootContextParams.THIS_ENTITY) instanceof WanderingTrader trader && (applyToAllTraders || ((WanderingTraderInterface) trader).isChameleonVillager())) {
             if (emeralds > 0) {
